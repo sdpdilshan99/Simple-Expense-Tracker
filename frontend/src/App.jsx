@@ -6,6 +6,7 @@ import HomePage from "./components/Homepage";
 import AddTransactionForm from "./components/AddTransactionForm";
 import TransactionList from "./components/TransactionList";
 import ManageTags from "./components/ManageTags";
+import { ToastContainer } from "react-toastify";
 
 function App() {
   const [menu,setMenu] = useState(false);
@@ -30,6 +31,8 @@ function App() {
               </div>
             </>
           )}
+
+          <ToastContainer position="top-right" autoClose={3000}/>
         </div>
       </div>
     </Router>

@@ -13,7 +13,7 @@ const getAllTransactions = (req, res, next) => {
 
     db.query(query, (error, result) => {
         if(error){
-            return res.status(500).json({ error: error.message });
+            return next(error);
         }
 
         const formatted = result.map((row) => ({
@@ -39,7 +39,7 @@ const addTransaction = (req, res, next) => {
     
     db.query(query, [type,description, amount, date], (error, result) => {
         if (error) {
-            return res.status(500).json({ error: error.message });
+            return next(error);
         }
 
         const transactionId = result.insertId;

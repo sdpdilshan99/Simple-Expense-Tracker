@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const transactionRoute = require('./routes/transactionRoutes');
 const tagsRoute = require('./routes/tagsRoutes');
+const errorHandler = require('./middlewares/errorHandler');
+const { notFound } = require('./middlewares/notFound');
 
 dotenv.config();
 
@@ -15,13 +17,15 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
 
-app.get('/', (req,res,next) => {
-    res.send('Hello');
-})
+
 app.use('/api/transaction', transactionRoute);
 app.use('/api/tags', tagsRoute);
 
+//not found route
+// app.use('*', notFound);
 
+//error handling middleware
+app.use(errorHandler);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);

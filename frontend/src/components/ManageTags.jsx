@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
+import PopupMessage from "./utils/popupMessage";
 
 const ManageTags = () => {
   
@@ -28,12 +30,13 @@ const ManageTags = () => {
             setMessage('Tag added successfully!');
 
             fetchTags();
-            
+            toast.success('Tag Added successfully');
             console.log('Tag added:', newTag);
           } catch (error) {
-            console.error('Error adding tag:', error);
+            const response = error.response;
+            const data = response.data;
             
-            alert('An error occurred while adding the tag. Please try again.');
+            alert(data.error);
           }
     };
     
@@ -51,7 +54,8 @@ const ManageTags = () => {
             const confirmDelete = window.confirm("Are you sure delete this tag?");
             if (!confirmDelete) return;
 
-            await axios.delete(`http://localhost:5000/api/tags/${id}`);
+            const response = await axios.delete(`http://localhost:5000/api/tags/${id}`);
+            console.log(response)
             setMessage('Tag deleted successfully!');
 
             fetchTags();
@@ -92,12 +96,12 @@ const ManageTags = () => {
         fetchTags();
     },[])
 
-    useEffect(() => {
-        if(message){
-            const timer = setTimeout(() => setMessage(''), 3000);
-            return (() => clearTimeout(timer));
-        }
-    },[message])
+    // useEffect(() => {
+    //     if(message){
+    //         const timer = setTimeout(() => setMessage(''), 3000);
+    //         return (() => clearTimeout(timer));
+    //     }
+    // },[message])
 
     
     
@@ -108,9 +112,7 @@ const ManageTags = () => {
             <h2 className="mb-2 text-lg font-semibold">Manage Tags</h2>
 
             {message && (
-            <div className="text-green-600 mb-3 font-semibold">
-                {message}
-            </div>
+             <PopupMessage message={message} type={'type'}/>
             )}
 
             <div className="flex justify-center mb-5">

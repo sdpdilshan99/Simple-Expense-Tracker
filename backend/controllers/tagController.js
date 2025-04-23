@@ -6,7 +6,7 @@ const getAllTags = (req, res, next) => {
 
     db.query(query, (error, result) => {
         if(error){
-            return res.status(500).json({error: error.message});
+            return next(error);
         }
         res.status(200).json(result);
         console.log(result)
@@ -15,22 +15,36 @@ const getAllTags = (req, res, next) => {
 }
 
 const addTag = (req, res, next) => {
-    const {title, color} = req.body;
+    const { title, color } = req.body;
 
-    if(!title|| !color){
+    if (!title || !color) {
         return res.status(400).json({ error: 'Title and color are required' });
     }
 
-    const query = 'INSERT INTO tags (title, color) VALUES (?, ?)';
-    db.query(query, [title, color], (error, result) => {
-        if(error){
-            return res.status(500).json({ error: error.message });
+    const checkQuery = 'SELECT * FROM tags WHERE title = ?';
+    db.query(checkQuery, [title], (error, result) => {
+        if (error) {
+            console.error('Database error during tag check:', error); 
+            return next(error); 
         }
-        console.log(result);
-        res.status(201).json({ message: 'Tag added successfully', tagId: result.insertId });
+
+        if (result.length > 0) {
+            return res.status(400).json({ error: 'Tag with this title already exists' });
+        }
+
+        const insertQuery = 'INSERT INTO tags (title, color) VALUES (?, ?)';
+        db.query(insertQuery, [title, color], (error, result) => {
+            if (error) {
+                console.error('Database error during tag insertion:', error); 
+                return next(error); 
+            }
+
+            console.log('Tag added successfully:', result); 
+            res.status(201).json({ message: 'Tag added successfully', tagId: result.insertId });
+        });
     });
-    
-}
+};
+
 
 const deleteTag = (req, res) => {
     const {id} = req.params;
@@ -38,7 +52,7 @@ const deleteTag = (req, res) => {
     const query = 'DELETE FROM tags WHERE id = ?';
     db.query(query, [id], (error, result) => {
         if (error) {
-            return res.status(500).json({ error: error.message });
+            return next(error);
         }
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Tag not found' });
@@ -59,7 +73,7 @@ const editTag = (req, res) =>{
     const query = 'UPDATE tags SET title = ?, color = ? WHERE id = ?';
     db.query(query, [title, color, id], (error, result) => {
         if (error) {
-            return res.status(500).json({ error: error.message });
+            return next(error);
         }
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Tag not found' });
